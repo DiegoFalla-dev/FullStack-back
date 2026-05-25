@@ -75,6 +75,37 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-validation</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.mysql</groupId>
+			<artifactId>mysql-connector-j</artifactId>
+			<version>8.0.33</version>
+		</dependency>
+		<dependency>
+			<groupId>org.mapstruct</groupId>
+			<artifactId>mapstruct</artifactId>
+			<version>1.5.5.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-api</artifactId>
+			<version>0.11.5</version>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-impl</artifactId>
+			<version>0.11.5</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.jsonwebtoken</groupId>
+			<artifactId>jjwt-jackson</artifactId>
+			<version>0.11.5</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-data-jpa-test</artifactId>
 			<scope>test</scope>
 		</dependency>
@@ -125,12 +156,7 @@
 							<goal>compile</goal>
 						</goals>
 						<configuration>
-							<annotationProcessorPaths>
-								<path>
-									<groupId>org.projectlombok</groupId>
-									<artifactId>lombok</artifactId>
-								</path>
-							</annotationProcessorPaths>
+							<annotationProcessorPaths>\n\t\t\t\t\t<path>\n\t\t\t\t\t\t<groupId>org.projectlombok</groupId>\n\t\t\t\t\t\t<artifactId>lombok</artifactId>\n\t\t\t\t\t</path>\n\t\t\t\t\t<path>\n\t\t\t\t\t\t<groupId>org.mapstruct</groupId>\n\t\t\t\t\t\t<artifactId>mapstruct-processor</artifactId>\n\t\t\t\t\t\t<version>1.5.5.Final</version>\n\t\t\t\t\t</path>\n\t\t\t\t</annotationProcessorPaths>
 						</configuration>
 					</execution>
 					<execution>
@@ -140,12 +166,7 @@
 							<goal>testCompile</goal>
 						</goals>
 						<configuration>
-							<annotationProcessorPaths>
-								<path>
-									<groupId>org.projectlombok</groupId>
-									<artifactId>lombok</artifactId>
-								</path>
-							</annotationProcessorPaths>
+							<annotationProcessorPaths>\n\t\t\t\t\t<path>\n\t\t\t\t\t\t<groupId>org.projectlombok</groupId>\n\t\t\t\t\t\t<artifactId>lombok</artifactId>\n\t\t\t\t\t</path>\n\t\t\t\t\t<path>\n\t\t\t\t\t\t<groupId>org.mapstruct</groupId>\n\t\t\t\t\t\t<artifactId>mapstruct-processor</artifactId>\n\t\t\t\t\t\t<version>1.5.5.Final</version>\n\t\t\t\t\t</path>\n\t\t\t\t</annotationProcessorPaths>
 						</configuration>
 					</execution>
 				</executions>
@@ -154,3 +175,4 @@
 	</build>
 
 </project>
+

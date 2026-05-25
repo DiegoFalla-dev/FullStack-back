@@ -1,0 +1,1 @@
+public class TestTicketTypeLoader { public static void main(String[] args) throws Exception { Class<?> c = Class.forName("com.fullstack.ticketflow.tickettype.TicketType"); System.out.println(c); for (java.lang.reflect.Method m : c.getDeclaredMethods()) System.out.println(m); } }

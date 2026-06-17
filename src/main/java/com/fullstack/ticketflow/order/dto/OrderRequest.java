@@ -1,13 +1,14 @@
 package com.fullstack.ticketflow.order.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import java.math.BigDecimal;
+import java.util.List;
 
 public record OrderRequest(
-        @NotBlank @Size(max = 36) String userId,
-        @NotBlank @Size(max = 20) String status,
-        @NotNull BigDecimal totalAmount
-) {
-}
+        @NotNull(message = "El método de pago es obligatorio")
+        String paymentMethod,
+
+        @NotEmpty(message = "La orden debe contener al menos un ítem")
+        List<@Valid OrderItemRequest> items
+) {}

@@ -31,4 +31,20 @@ public class OrderController {
     public ResponseEntity<ApiResponse<List<OrderResponse>>> getMyHistory(Authentication authentication) {
         return ResponseEntity.ok(ApiResponse.success(orderService.getUserOrderHistory(authentication.getName())));
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<ApiResponse<OrderResponse>> getById(@PathVariable String id) {
+        return ResponseEntity.ok(ApiResponse.success(orderService.getOrderById(id)));
+    }
+
+    // NUEVO: faltaba exponer cancelTicket, que ya existía en
+    // OrderServiceImpl con la regla de 72h implementada. Sin este
+    // endpoint, el front no tenía ninguna forma de llamarlo.
+    @PatchMapping("/tickets/{ticketId}/cancel")
+    public ResponseEntity<ApiResponse<Void>> cancelTicket(
+            @PathVariable String ticketId,
+            Authentication authentication) {
+        orderService.cancelTicket(authentication.getName(), ticketId);
+        return ResponseEntity.ok(ApiResponse.success(null));
+    }
 }

@@ -6,8 +6,8 @@ public record VenueResponse(
         Integer id,
         String name,
         String address,
+        String city,
         Integer capacity,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
-) {
-}
+) {}

@@ -21,10 +21,12 @@ public interface UserMapper {
 
     @Mapping(target = "roleId", source = "role.id")
     @Mapping(target = "roleName", source = "role.name")
+    @Mapping(target = "isActive", source = "active")
     UserResponse toResponse(User user);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "role", ignore = true)
+    @Mapping(target = "email", ignore = true)
     @Mapping(target = "pwdHash", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)

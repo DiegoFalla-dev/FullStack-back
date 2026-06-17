@@ -1,15 +1,15 @@
 package com.fullstack.ticketflow.ticket.dto;
 
+import lombok.Builder;
+import lombok.Data;
 import java.time.LocalDateTime;
 
-public record TicketResponse(
-        String id,
-        String orderItemId,
-        Integer ticketTypeId,
-        String qrCode,
-        String holderName,
-        boolean isVoid,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt
-) {
+@Data
+@Builder
+public class TicketResponse {
+    private String id; // UUID
+    private String qrCode;
+    private String status;
+    private String ticketTypeName;
+    private LocalDateTime createdAt;
 }

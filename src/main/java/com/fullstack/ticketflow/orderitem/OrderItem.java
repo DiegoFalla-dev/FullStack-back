@@ -1,25 +1,16 @@
 package com.fullstack.ticketflow.orderitem;
 
 import com.fullstack.ticketflow.order.Order;
+import com.fullstack.ticketflow.ticket.Ticket;
 import com.fullstack.ticketflow.tickettype.TicketType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import jakarta.persistence.*;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -51,4 +42,9 @@ public class OrderItem {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+    // Relación bidireccional para poder ver qué entradas físicas pertenecen a este ítem
+    @OneToMany(mappedBy = "orderItem", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<Ticket> tickets = new ArrayList<>();
 }

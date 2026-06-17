@@ -2,7 +2,7 @@ package com.fullstack.ticketflow.role;
 
 import com.fullstack.ticketflow.role.dto.RoleRequest;
 import com.fullstack.ticketflow.role.dto.RoleResponse;
-import com.fullstack.ticketflow.shared.exception.BusinessException;
+import com.fullstack.ticketflow.shared.exception.BusinessRuleException;
 import com.fullstack.ticketflow.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -35,7 +35,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public RoleResponse create(RoleRequest request) {
         if (repository.existsByName(request.name())) {
-            throw new BusinessException("Role already exists");
+            throw new BusinessRuleException("Role already exists");
         }
         return mapper.toResponse(repository.save(mapper.toEntity(request)));
     }
@@ -45,7 +45,7 @@ public class RoleServiceImpl implements RoleService {
     public RoleResponse update(Short id, RoleRequest request) {
         Role role = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Role not found"));
         if (!role.getName().equals(request.name()) && repository.existsByName(request.name())) {
-            throw new BusinessException("Role already exists");
+            throw new BusinessRuleException("Role already exists");
         }
         role.setName(request.name());
         return mapper.toResponse(repository.save(role));

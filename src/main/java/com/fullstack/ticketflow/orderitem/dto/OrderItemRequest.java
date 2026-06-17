@@ -1,13 +1,14 @@
 package com.fullstack.ticketflow.orderitem.dto;
-
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import java.math.BigDecimal;
+import lombok.Data;
 
-public record OrderItemRequest(
-        @NotNull String orderId,
-        @NotNull Integer ticketTypeId,
-        @NotNull @Positive Integer quantity,
-        @NotNull BigDecimal unitPrice
-) {
+@Data
+public class OrderItemRequest {
+    @NotNull(message = "El ID del tipo de ticket es obligatorio")
+    private Integer ticketTypeId;
+
+    @NotNull(message = "La cantidad es obligatoria")
+    @Min(value = 1, message = "La cantidad mínima a comprar es 1")
+    private Integer quantity;
 }

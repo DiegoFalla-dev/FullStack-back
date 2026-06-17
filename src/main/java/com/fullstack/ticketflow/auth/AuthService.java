@@ -7,7 +7,7 @@ import com.fullstack.ticketflow.auth.dto.RegisterResponse;
 import com.fullstack.ticketflow.config.JwtService;
 import com.fullstack.ticketflow.role.Role;
 import com.fullstack.ticketflow.role.RoleRepository;
-import com.fullstack.ticketflow.shared.exception.BusinessException;
+import com.fullstack.ticketflow.shared.exception.BusinessRuleException;
 import com.fullstack.ticketflow.shared.exception.ResourceNotFoundException;
 import com.fullstack.ticketflow.user.User;
 import com.fullstack.ticketflow.user.UserRepository;
@@ -43,7 +43,7 @@ public class AuthService {
     @Transactional
     public RegisterResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.email())) {
-            throw new BusinessException("Email already registered");
+            throw new BusinessRuleException("Email already registered");
         }
         
         Role role = roleRepository.findById(request.roleId())

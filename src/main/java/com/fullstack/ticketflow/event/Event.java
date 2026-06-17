@@ -1,24 +1,16 @@
 package com.fullstack.ticketflow.event;
 
+import com.fullstack.ticketflow.tickettype.TicketType;
 import com.fullstack.ticketflow.venue.Venue;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.fullstack.ticketflow.user.User;
+import jakarta.persistence.*;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -34,25 +26,32 @@ public class Event {
     @Column(columnDefinition = "INT UNSIGNED")
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "venue_id", nullable = false)
-    private Venue venue;
-
-    @Column(nullable = false, length = 200)
-    private String name;
+    @Column(nullable = false, length = 150)
+    private String title;
 
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "starts_at", nullable = false)
-    private LocalDateTime startsAt;
+    @Column(name = "date_time", nullable = false)
+    private LocalDateTime dateTime;
 
-    @Column(name = "ends_at", nullable = false)
-    private LocalDateTime endsAt;
+    @Column(name = "image_url", length = 255)
+    private String imageUrl;
 
-    @Column(name = "is_active", nullable = false)
+    @Column(nullable = false, length = 20)
+    private String status; // ACTIVE, CONCLUDED, CANCELLED
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "venue_id", nullable = false)
+    private Venue venue;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organizer_id", nullable = false)
+    private User organizer;
+
+    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
-    private boolean active = true;
+    private List<TicketType> ticketTypes = new ArrayList<>();
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)

@@ -46,8 +46,8 @@ public class AuthService {
             throw new BusinessRuleException("Email already registered");
         }
         
-        Role role = roleRepository.findById(request.roleId())
-                .orElseThrow(() -> new ResourceNotFoundException("Role not found"));
+        Role role = roleRepository.findByName("CLIENT")
+                .orElseThrow(() -> new ResourceNotFoundException("Default CLIENT role not found"));
         
         User user = User.builder()
                 .email(request.email())

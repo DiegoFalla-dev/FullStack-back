@@ -7,6 +7,6 @@ import java.util.List;
 public interface OrderService {
     OrderResponse createOrder(String userEmail, OrderRequest request);
     void cancelTicket(String userEmail, String ticketId);
-    OrderResponse getOrderById(String orderId);
+    OrderResponse getOrderById(String userEmail, String orderId);
     List<OrderResponse> getUserOrderHistory(String userEmail);
 }

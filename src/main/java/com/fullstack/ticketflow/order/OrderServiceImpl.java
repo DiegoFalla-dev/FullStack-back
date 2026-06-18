@@ -80,6 +80,7 @@ public class OrderServiceImpl implements OrderService {
                 Ticket ticket = new Ticket();
                 ticket.setId(UUID.randomUUID().toString());
                 ticket.setOrderItem(orderItem);
+                ticket.setTicketType(ticketType);
                 ticket.setStatus(TicketStatus.VALID);
                 ticket.setQrCode(UUID.randomUUID().toString());
 
@@ -151,9 +152,15 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional(readOnly = true)
-    public OrderResponse getOrderById(String orderId) {
+    public OrderResponse getOrderById(String userEmail, String orderId) {
+        User requester = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Orden no encontrada"));
+
+        if (!isAdmin(requester) && !order.getUser().getEmail().equals(userEmail)) {
+            throw new BusinessRuleException("No tienes autorización para ver esta orden.");
+        }
 
         List<Ticket> tickets = new ArrayList<>();
         order.getOrderItems().forEach(oi -> tickets.addAll(oi.getTickets()));
@@ -192,5 +199,9 @@ public class OrderServiceImpl implements OrderService {
                         .createdAt(t.getCreatedAt())
                         .build()).collect(Collectors.toList()))
                 .build();
+    }
+
+    private boolean isAdmin(User user) {
+        return user.getRole() != null && "ADMIN".equals(user.getRole().getName());
     }
 }

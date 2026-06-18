@@ -33,8 +33,8 @@ public class OrderController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<OrderResponse>> getById(@PathVariable String id) {
-        return ResponseEntity.ok(ApiResponse.success(orderService.getOrderById(id)));
+    public ResponseEntity<ApiResponse<OrderResponse>> getById(@PathVariable String id, Authentication authentication) {
+        return ResponseEntity.ok(ApiResponse.success(orderService.getOrderById(authentication.getName(), id)));
     }
 
     // NUEVO: faltaba exponer cancelTicket, que ya existía en

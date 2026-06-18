@@ -105,6 +105,12 @@ public class EventServiceImpl implements EventService {
             throw new BusinessRuleException("No se puede eliminar el evento porque ya existen entradas vendidas. Contacta al administrador.");
         }
 
+        if (hasSales) {
+            event.setStatus("CANCELLED");
+            eventRepository.save(event);
+            return;
+        }
+
         eventRepository.delete(event);
     }
 

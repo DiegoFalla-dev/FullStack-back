@@ -12,6 +12,8 @@ import java.util.List;
 public class OrderResponse {
     private String id; // UUID
     private String userId; // UUID
+    private String userEmail;
+    private String userFullName;
     private BigDecimal total;
     private String paymentStatus;
     private String paymentMethod;

@@ -9,4 +9,6 @@ public interface OrderService {
     void cancelTicket(String userEmail, String ticketId);
     OrderResponse getOrderById(String userEmail, String orderId);
     List<OrderResponse> getUserOrderHistory(String userEmail);
+    List<OrderResponse> getAllOrders(String requesterEmail);
+    List<OrderResponse> getOrganizerSales(String organizerEmail);
 }

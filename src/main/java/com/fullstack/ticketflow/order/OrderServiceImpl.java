@@ -183,10 +183,49 @@ public class OrderServiceImpl implements OrderService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrderResponse> getAllOrders(String requesterEmail) {
+        User requester = userRepository.findByEmail(requesterEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
+
+        if (!isAdmin(requester)) {
+            throw new BusinessRuleException("Solo el administrador puede ver todas las órdenes.");
+        }
+
+        return orderRepository.findAllByOrderByPaidAtDesc().stream()
+                .map(this::mapToOrderResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<OrderResponse> getOrganizerSales(String organizerEmail) {
+        User organizer = userRepository.findByEmail(organizerEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("Organizador no encontrado"));
+
+        boolean isOrganizer = organizer.getRole() != null && "ORGANIZER".equals(organizer.getRole().getName());
+        if (!isOrganizer) {
+            throw new BusinessRuleException("Solo el organizador puede ver sus ventas.");
+        }
+
+        return orderRepository.findSalesByOrganizerEmail(organizerEmail).stream()
+                .map(this::mapToOrderResponse)
+                .collect(Collectors.toList());
+    }
+
+    private OrderResponse mapToOrderResponse(Order order) {
+        List<Ticket> tickets = new ArrayList<>();
+        order.getOrderItems().forEach(oi -> tickets.addAll(oi.getTickets()));
+        return mapToOrderResponse(order, tickets);
+    }
+
     private OrderResponse mapToOrderResponse(Order order, List<Ticket> tickets) {
         return OrderResponse.builder()
                 .id(order.getId())
                 .userId(order.getUser().getId())
+                .userEmail(order.getUser().getEmail())
+                .userFullName(order.getUser().getFullName())
                 .total(order.getTotalAmount())
                 .paymentStatus(order.getPaymentStatus().name())
                 .paymentMethod(order.getPaymentMethod())
@@ -195,6 +234,8 @@ public class OrderServiceImpl implements OrderService {
                         .id(t.getId())
                         .qrCode(t.getQrCode())
                         .status(t.getStatus().name())
+                        .eventId(t.getOrderItem().getTicketType().getEvent().getId())
+                        .eventTitle(t.getOrderItem().getTicketType().getEvent().getTitle())
                         .ticketTypeName(t.getOrderItem().getTicketType().getName())
                         .createdAt(t.getCreatedAt())
                         .build()).collect(Collectors.toList()))

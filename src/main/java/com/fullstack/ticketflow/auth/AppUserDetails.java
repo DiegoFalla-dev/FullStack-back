@@ -3,6 +3,7 @@ package com.fullstack.ticketflow.auth;
 import com.fullstack.ticketflow.user.User;
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
@@ -22,7 +23,7 @@ public class AppUserDetails implements UserDetails {
         this.username = user.getEmail();
         this.password = user.getPwdHash();
         this.active = user.isActive();
-        this.authorities = List.of(() -> "ROLE_" + user.getRole().getName());
+        this.authorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().getName()));
     }
 
     @Override

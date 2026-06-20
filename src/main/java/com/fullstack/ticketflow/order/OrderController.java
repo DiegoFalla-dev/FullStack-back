@@ -5,6 +5,7 @@ import com.fullstack.ticketflow.order.dto.OrderResponse;
 import com.fullstack.ticketflow.shared.response.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -32,7 +33,19 @@ public class OrderController {
         return ResponseEntity.ok(ApiResponse.success(orderService.getUserOrderHistory(authentication.getName())));
     }
 
-    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<OrderResponse>>> getAll(Authentication authentication) {
+        return ResponseEntity.ok(ApiResponse.success(orderService.getAllOrders(authentication.getName())));
+    }
+
+    @PreAuthorize("hasRole('ORGANIZER')")
+    @GetMapping("/organizer-sales")
+    public ResponseEntity<ApiResponse<List<OrderResponse>>> getOrganizerSales(Authentication authentication) {
+        return ResponseEntity.ok(ApiResponse.success(orderService.getOrganizerSales(authentication.getName())));
+    }
+
+    @GetMapping("/{id:[0-9a-fA-F-]{36}}")
     public ResponseEntity<ApiResponse<OrderResponse>> getById(@PathVariable String id, Authentication authentication) {
         return ResponseEntity.ok(ApiResponse.success(orderService.getOrderById(authentication.getName(), id)));
     }

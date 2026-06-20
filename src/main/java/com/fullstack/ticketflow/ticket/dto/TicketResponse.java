@@ -10,6 +10,8 @@ public class TicketResponse {
     private String id; // UUID
     private String qrCode;
     private String status;
+    private Integer eventId;
+    private String eventTitle;
     private String ticketTypeName;
     private LocalDateTime createdAt;
 }

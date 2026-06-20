@@ -36,6 +36,13 @@ public class EventServiceImpl implements EventService {
 
     @Transactional(readOnly = true)
     @Override
+    public Page<EventResponse> listMine(String organizerEmail, Pageable pageable) {
+        return eventRepository.findAllByOrganizer_Email(organizerEmail, pageable)
+                .map(this::mapToResponse);
+    }
+
+    @Transactional(readOnly = true)
+    @Override
     public EventResponse getById(Integer id) {
         return eventRepository.findById(id)
                 .map(this::mapToResponse)

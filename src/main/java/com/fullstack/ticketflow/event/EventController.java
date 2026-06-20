@@ -3,6 +3,7 @@ package com.fullstack.ticketflow.event;
 import com.fullstack.ticketflow.event.dto.EventRequest;
 import com.fullstack.ticketflow.event.dto.EventResponse;
 import com.fullstack.ticketflow.shared.response.ApiResponse;
+import jakarta.annotation.security.PermitAll;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,6 +24,7 @@ public class EventController {
     private final EventService eventService;
 
     @GetMapping
+    @PermitAll
     public ResponseEntity<ApiResponse<Page<EventResponse>>> getAll(
             @RequestParam(required = false) String title,
             @RequestParam(required = false) String city,
@@ -32,7 +34,14 @@ public class EventController {
         return ResponseEntity.ok(ApiResponse.success(eventService.search(title, city, minPrice, maxPrice, pageable)));
     }
 
-    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ORGANIZER')")
+    @GetMapping("/my")
+    public ResponseEntity<ApiResponse<Page<EventResponse>>> getMine(Authentication auth, Pageable pageable) {
+        return ResponseEntity.ok(ApiResponse.success(eventService.listMine(auth.getName(), pageable)));
+    }
+
+    @GetMapping("/{id:[0-9]+}")
+    @PermitAll
     public ResponseEntity<ApiResponse<EventResponse>> getById(@PathVariable Integer id) {
         return ResponseEntity.ok(ApiResponse.success(eventService.getById(id)));
     }

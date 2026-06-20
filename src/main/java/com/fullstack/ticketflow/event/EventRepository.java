@@ -8,11 +8,12 @@ import org.springframework.data.repository.query.Param;
 import java.math.BigDecimal;
 
 public interface EventRepository extends JpaRepository<Event, Integer> {
+    Page<Event> findAllByOrganizer_Email(String email, Pageable pageable);
 
     // Filtro dinámico cruzado: Busca por título, por la ciudad del Venue y por rango de precios de sus TicketTypes
     @Query("SELECT DISTINCT e FROM Event e " +
             "JOIN e.venue v " +
-            "JOIN e.ticketTypes t " +
+            "LEFT JOIN e.ticketTypes t " +
             "WHERE (:title IS NULL OR LOWER(e.title) LIKE LOWER(CONCAT('%', :title, '%'))) " +
             "AND (:city IS NULL OR LOWER(v.city) = LOWER(:city)) " +
             "AND (:minPrice IS NULL OR t.price >= :minPrice) " +

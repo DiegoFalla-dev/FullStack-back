@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 
 public interface EventService {
     Page<EventResponse> search(String title, String city, BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable);
+    Page<EventResponse> listMine(String organizerEmail, Pageable pageable);
     EventResponse getById(Integer id);
     EventResponse create(String organizerEmail, EventRequest request);
     EventResponse update(Integer id, String organizerEmail, EventRequest request);

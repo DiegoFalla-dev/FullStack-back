@@ -28,13 +28,13 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     @Override
     public Page<UserResponse> list(Pageable pageable) {
-        return repository.findAllByActiveTrue(pageable).map(mapper::toResponse);
+        return repository.findAll(pageable).map(mapper::toResponse);
     }
 
     @Transactional(readOnly = true)
     @Override
     public UserResponse getById(String id) {
-        return repository.findByIdAndActiveTrue(id)
+        return repository.findById(id)
                 .map(mapper::toResponse)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
@@ -101,6 +101,15 @@ public class UserServiceImpl implements UserService {
         User user = repository.findByIdAndActiveTrue(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         user.setActive(false);
+        repository.save(user);
+    }
+
+    @Transactional
+    @Override
+    public void activate(String id) {
+        User user = repository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+        user.setActive(true);
         repository.save(user);
     }
 }

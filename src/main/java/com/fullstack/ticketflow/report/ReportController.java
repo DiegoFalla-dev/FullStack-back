@@ -1,5 +1,6 @@
 package com.fullstack.ticketflow.report;
 
+import com.fullstack.ticketflow.report.dto.ClientsByMonthResponse;
 import com.fullstack.ticketflow.report.dto.SalesByMonthResponse;
 import com.fullstack.ticketflow.report.dto.TicketsByCategoryMonthResponse;
 import com.fullstack.ticketflow.shared.response.ApiResponse;
@@ -19,6 +20,11 @@ import java.util.List;
 public class ReportController {
 
     private final ReportService reportService;
+
+    @GetMapping("/clients-by-month")
+    public ResponseEntity<ApiResponse<List<ClientsByMonthResponse>>> getClientsByMonth() {
+        return ResponseEntity.ok(ApiResponse.success(reportService.getClientsByMonth()));
+    }
 
     @GetMapping("/sales-by-month")
     public ResponseEntity<ApiResponse<List<SalesByMonthResponse>>> getSalesByMonth() {

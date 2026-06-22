@@ -17,4 +17,5 @@ public interface UserService {
     UserResponse updateProfile(String email, ProfileUpdateRequest request);
     void changePassword(String id, PasswordChangeRequest request);
     void deactivate(String id);
+    void activate(String id);
 }

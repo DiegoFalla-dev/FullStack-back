@@ -4,8 +4,10 @@ import com.fullstack.ticketflow.order.Order;
 import com.fullstack.ticketflow.order.OrderRepository;
 import com.fullstack.ticketflow.order.enums.PaymentStatus;
 import com.fullstack.ticketflow.orderitem.OrderItem;
+import com.fullstack.ticketflow.report.dto.ClientsByMonthResponse;
 import com.fullstack.ticketflow.report.dto.SalesByMonthResponse;
 import com.fullstack.ticketflow.report.dto.TicketsByCategoryMonthResponse;
+import com.fullstack.ticketflow.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +26,26 @@ import java.util.stream.Collectors;
 public class ReportServiceImpl implements ReportService {
 
     private final OrderRepository orderRepository;
+    private final UserRepository userRepository;
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ClientsByMonthResponse> getClientsByMonth() {
+        Map<YearMonth, Long> totals = new TreeMap<>();
+
+        userRepository.findAll().stream()
+                .filter(user -> user.getRole() != null)
+                .filter(user -> "CLIENT".equals(user.getRole().getName()))
+                .forEach(user -> totals.merge(
+                        YearMonth.from(user.getCreatedAt()),
+                        1L,
+                        Long::sum
+                ));
+
+        return totals.entrySet().stream()
+                .map(entry -> new ClientsByMonthResponse(entry.getKey().toString(), entry.getValue()))
+                .toList();
+    }
 
     @Override
     @Transactional(readOnly = true)

@@ -17,10 +17,14 @@ import com.fullstack.ticketflow.tickettype.TicketTypeRepository;
 import com.fullstack.ticketflow.user.User;
 import com.fullstack.ticketflow.user.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import com.fullstack.ticketflow.tickettype.dto.StockUpdateMessage;
+import com.fullstack.ticketflow.report.dto.MetricsUpdateMessage;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -29,6 +33,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
@@ -38,6 +43,52 @@ public class OrderServiceImpl implements OrderService {
     private final TicketRepository ticketRepository;
     private final UserRepository userRepository;
     private final SimpMessagingTemplate messagingTemplate; // Inyectado correctamente
+
+    // Difunde el stock SOLO cuando la transacción confirma (afterCommit). Así
+    // nunca se envía un valor que un rollback dejaría inválido. Envuelto en
+    // try/catch para que un fallo de mensajería no afecte a la orden ya creada.
+    private void broadcastStock(Integer ticketTypeId, int availableStock) {
+        Runnable task = () -> {
+            try {
+                log.info("WS stock-update → ticketTypeId={} stock={}", ticketTypeId, availableStock);
+                messagingTemplate.convertAndSend(
+                        "/topic/stock-updates",
+                        new StockUpdateMessage(ticketTypeId, availableStock));
+            } catch (Exception ex) {
+                log.error("WS: fallo al difundir stock (la operación ya está confirmada): {}", ex.getMessage());
+            }
+        };
+        runAfterCommit(task);
+    }
+
+    // Avisa a los dashboards del administrador que las ventas cambiaron, para
+    // que refresquen sus métricas en tiempo real (también tras el commit).
+    private void broadcastMetricsChanged() {
+        Runnable task = () -> {
+            try {
+                log.info("WS metrics-update → notificando a dashboards admin");
+                messagingTemplate.convertAndSend(
+                        "/topic/metrics-updates",
+                        new MetricsUpdateMessage(System.currentTimeMillis()));
+            } catch (Exception ex) {
+                log.error("WS: fallo al difundir métricas: {}", ex.getMessage());
+            }
+        };
+        runAfterCommit(task);
+    }
+
+    private void runAfterCommit(Runnable task) {
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    task.run();
+                }
+            });
+        } else {
+            task.run();
+        }
+    }
 
     @Override
     @Transactional
@@ -94,17 +145,15 @@ public class OrderServiceImpl implements OrderService {
 
         Order savedOrder = orderRepository.save(order);
 
-        // --- PIEZA FALTANTE 1: TRANSMISIÓN POR WEBSOCKET (COMPRA EXITOSA) ---
+        // --- TRANSMISIÓN POR WEBSOCKET (COMPRA EXITOSA) ---
+        // Se difunde el nuevo stock de cada categoría y se avisa a los
+        // dashboards admin. Ambos se emiten en afterCommit (ver helpers).
         savedOrder.getOrderItems().forEach(oi -> {
             TicketType tt = oi.getTicketType();
             int currentStock = tt.getTotalQty() - tt.getSoldQty();
-
-            // Enviamos el ID y el nuevo stock calculado en tiempo real
-            messagingTemplate.convertAndSend(
-                    "/topic/stock-updates",
-                    new StockUpdateMessage(tt.getId(), currentStock)
-            );
+            broadcastStock(tt.getId(), currentStock);
         });
+        broadcastMetricsChanged();
         // --------------------------------------------------------------------
 
         List<Ticket> generatedTickets = new ArrayList<>();
@@ -141,12 +190,10 @@ public class OrderServiceImpl implements OrderService {
         ticketType.setSoldQty(ticketType.getSoldQty() - 1);
         TicketType savedTicketType = ticketTypeRepository.save(ticketType);
 
-        // --- PIEZA FALTANTE 2: TRANSMISIÓN POR WEBSOCKET (CANCELACIÓN - STOCK LIBERADO) ---
+        // --- TRANSMISIÓN POR WEBSOCKET (CANCELACIÓN - STOCK LIBERADO) ---
         int currentStock = savedTicketType.getTotalQty() - savedTicketType.getSoldQty();
-        messagingTemplate.convertAndSend(
-                "/topic/stock-updates",
-                new StockUpdateMessage(savedTicketType.getId(), currentStock)
-        );
+        broadcastStock(savedTicketType.getId(), currentStock);
+        broadcastMetricsChanged();
         // ----------------------------------------------------------------------------------
     }
 

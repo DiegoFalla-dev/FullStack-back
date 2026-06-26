@@ -28,10 +28,11 @@ public class EventController {
     public ResponseEntity<ApiResponse<Page<EventResponse>>> getAll(
             @RequestParam(required = false) String title,
             @RequestParam(required = false) String city,
+            @RequestParam(required = false) Short categoryId,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
             Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.success(eventService.search(title, city, minPrice, maxPrice, pageable)));
+        return ResponseEntity.ok(ApiResponse.success(eventService.search(title, city, categoryId, minPrice, maxPrice, pageable)));
     }
 
     @PreAuthorize("hasRole('ORGANIZER')")

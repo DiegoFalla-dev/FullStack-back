@@ -1,5 +1,7 @@
 package com.fullstack.ticketflow.event;
 
+import com.fullstack.ticketflow.category.Category;
+import com.fullstack.ticketflow.category.CategoryRepository;
 import com.fullstack.ticketflow.event.dto.EventRequest;
 import com.fullstack.ticketflow.event.dto.EventResponse;
 import com.fullstack.ticketflow.shared.exception.BusinessRuleException;
@@ -26,11 +28,12 @@ public class EventServiceImpl implements EventService {
     private final EventRepository eventRepository;
     private final VenueRepository venueRepository;
     private final UserRepository userRepository;
+    private final CategoryRepository categoryRepository;
 
     @Transactional(readOnly = true)
     @Override
-    public Page<EventResponse> search(String title, String city, BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
-        return eventRepository.findFilteredEvents(title, city, minPrice, maxPrice, pageable)
+    public Page<EventResponse> search(String title, String city, Short categoryId, BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
+        return eventRepository.findFilteredEvents(title, city, categoryId, minPrice, maxPrice, pageable)
                 .map(this::mapToResponse);
     }
 
@@ -56,6 +59,8 @@ public class EventServiceImpl implements EventService {
                 .orElseThrow(() -> new ResourceNotFoundException("Organizador no encontrado"));
         Venue venue = venueRepository.findById(request.venueId())
                 .orElseThrow(() -> new ResourceNotFoundException("Lugar no encontrado"));
+        Category category = categoryRepository.findById(request.categoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada"));
 
         Event event = Event.builder()
                 .title(request.title())
@@ -65,6 +70,7 @@ public class EventServiceImpl implements EventService {
                 .status("ACTIVE")
                 .venue(venue)
                 .organizer(organizer)
+                .category(category)
                 .build();
 
         return mapToResponse(eventRepository.save(event));
@@ -84,12 +90,15 @@ public class EventServiceImpl implements EventService {
 
         Venue venue = venueRepository.findById(request.venueId())
                 .orElseThrow(() -> new ResourceNotFoundException("Lugar no encontrado"));
+        Category category = categoryRepository.findById(request.categoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada"));
 
         event.setTitle(request.title());
         event.setDescription(request.description());
         event.setDateTime(request.dateTime());
         event.setImageUrl(request.imageUrl());
         event.setVenue(venue);
+        event.setCategory(category);
 
         return mapToResponse(eventRepository.save(event));
     }
@@ -150,7 +159,9 @@ public class EventServiceImpl implements EventService {
                 event.getStatus(),
                 venueResp,
                 event.getOrganizer().getFullName(),
-                minPrice
+                minPrice,
+                event.getCategory() != null ? event.getCategory().getId() : null,
+                event.getCategory() != null ? event.getCategory().getName() : null
         );
     }
 }

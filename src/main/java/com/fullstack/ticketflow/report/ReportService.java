@@ -10,4 +10,5 @@ public interface ReportService {
     List<ClientsByMonthResponse> getClientsByMonth();
     List<SalesByMonthResponse> getSalesByMonth();
     List<TicketsByCategoryMonthResponse> getTicketsByCategoryByMonth();
+    List<TicketsByCategoryMonthResponse> getTicketsByEventCategoryByMonth();
 }

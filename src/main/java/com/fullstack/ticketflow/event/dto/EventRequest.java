@@ -11,5 +11,6 @@ public record EventRequest(
         @NotBlank String description,
         @NotNull @Future LocalDateTime dateTime,
         String imageUrl,
-        @NotNull Integer venueId
+        @NotNull Integer venueId,
+        @NotNull Short categoryId
 ) {}

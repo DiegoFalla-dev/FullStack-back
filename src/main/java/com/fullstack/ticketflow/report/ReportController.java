@@ -35,4 +35,11 @@ public class ReportController {
     public ResponseEntity<ApiResponse<List<TicketsByCategoryMonthResponse>>> getTicketsByCategoryByMonth() {
         return ResponseEntity.ok(ApiResponse.success(reportService.getTicketsByCategoryByMonth()));
     }
+
+    // Entradas vendidas agrupadas por la CATEGORÍA del evento (Concierto,
+    // Teatro, etc.), distinto del reporte anterior que agrupa por tipo de ticket.
+    @GetMapping("/tickets-by-event-category-by-month")
+    public ResponseEntity<ApiResponse<List<TicketsByCategoryMonthResponse>>> getTicketsByEventCategoryByMonth() {
+        return ResponseEntity.ok(ApiResponse.success(reportService.getTicketsByEventCategoryByMonth()));
+    }
 }

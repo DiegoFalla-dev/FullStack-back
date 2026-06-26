@@ -1,5 +1,6 @@
 package com.fullstack.ticketflow.event;
 
+import com.fullstack.ticketflow.category.Category;
 import com.fullstack.ticketflow.tickettype.TicketType;
 import com.fullstack.ticketflow.venue.Venue;
 import com.fullstack.ticketflow.user.User;
@@ -48,6 +49,13 @@ public class Event {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organizer_id", nullable = false)
     private User organizer;
+
+    // Categoría/género del evento (Concierto, Teatro, etc.).
+    // Nullable a propósito para no romper filas existentes al aplicar
+    // ddl-auto=update; migrar con UPDATE y luego, si se desea, volverla NOT NULL.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id")
+    private Category category;
 
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default

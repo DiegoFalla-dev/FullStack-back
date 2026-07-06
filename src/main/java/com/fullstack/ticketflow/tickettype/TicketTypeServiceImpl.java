@@ -54,7 +54,7 @@ public class TicketTypeServiceImpl implements TicketTypeService {
     @Transactional
     public TicketTypeResponse update(Integer id, String requesterEmail, TicketTypeRequest request) {
         TicketType ticketType = ticketTypeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Tipo de entrada no encontrado"));
 
         assertCanModify(ticketType.getEvent(), requesterEmail);
 
@@ -76,14 +76,14 @@ public class TicketTypeServiceImpl implements TicketTypeService {
     @Transactional
     public void delete(Integer id, String requesterEmail) {
         TicketType ticketType = ticketTypeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada"));
+                .orElseThrow(() -> new ResourceNotFoundException("Tipo de entrada no encontrado"));
 
         assertCanModify(ticketType.getEvent(), requesterEmail);
 
         // Regla de negocio: no se elimina una categoría con ventas ya
         // confirmadas — esos clientes ya tienen tickets emitidos.
         if (ticketType.getSoldQty() > 0) {
-            throw new BusinessRuleException("No se puede eliminar una categoría con entradas vendidas");
+            throw new BusinessRuleException("No se puede eliminar un tipo de entrada con entradas vendidas");
         }
 
         ticketTypeRepository.delete(ticketType);

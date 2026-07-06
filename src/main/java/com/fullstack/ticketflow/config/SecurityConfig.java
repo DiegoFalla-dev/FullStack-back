@@ -64,6 +64,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/ticket-types").permitAll()
                         .requestMatchers("/api/categories", "/api/categories/**").permitAll()
                         .requestMatchers("/ws/**").permitAll()
+                        .requestMatchers("/actuator/**").permitAll()
                         .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

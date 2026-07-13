@@ -31,8 +31,9 @@ public class EventController {
             @RequestParam(required = false) Short categoryId,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice,
+            @RequestParam(defaultValue = "false") boolean upcomingOnly,
             Pageable pageable) {
-        return ResponseEntity.ok(ApiResponse.success(eventService.search(title, city, categoryId, minPrice, maxPrice, pageable)));
+        return ResponseEntity.ok(ApiResponse.success(eventService.search(title, city, categoryId, minPrice, maxPrice, upcomingOnly, pageable)));
     }
 
     @PreAuthorize("hasRole('ORGANIZER')")

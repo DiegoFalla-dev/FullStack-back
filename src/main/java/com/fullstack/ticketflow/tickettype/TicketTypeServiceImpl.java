@@ -38,6 +38,7 @@ public class TicketTypeServiceImpl implements TicketTypeService {
                 .orElseThrow(() -> new ResourceNotFoundException("Evento no encontrado"));
 
         assertCanModify(event, requesterEmail);
+        validateVenueCapacity(event, request.totalQty(), null);
 
         TicketType ticketType = TicketType.builder()
                 .event(event)
@@ -64,6 +65,8 @@ public class TicketTypeServiceImpl implements TicketTypeService {
             throw new BusinessRuleException(
                     "totalQty no puede ser menor que las entradas ya vendidas (" + ticketType.getSoldQty() + ")");
         }
+
+        validateVenueCapacity(ticketType.getEvent(), request.totalQty(), ticketType.getId());
 
         ticketType.setName(request.name());
         ticketType.setPrice(request.price());
@@ -98,6 +101,21 @@ public class TicketTypeServiceImpl implements TicketTypeService {
 
         if (!isOwner && !isAdmin) {
             throw new BusinessRuleException("Solo el organizador del evento puede modificar sus categorías de precio");
+        }
+    }
+
+    private void validateVenueCapacity(Event event, Integer requestedTotalQty, Integer excludeTicketTypeId) {
+        Long currentConfiguredQty = ticketTypeRepository.sumTotalQtyByEventIdExcludingId(
+                event.getId(),
+                excludeTicketTypeId
+        );
+        long projectedQty = currentConfiguredQty + requestedTotalQty;
+        int venueCapacity = event.getVenue().getCapacity();
+
+        if (projectedQty > venueCapacity) {
+            throw new BusinessRuleException(
+                    "La cantidad total de entradas (" + projectedQty + ") supera el aforo del venue (" + venueCapacity + ")"
+            );
         }
     }
 }

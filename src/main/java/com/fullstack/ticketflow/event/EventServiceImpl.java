@@ -32,8 +32,8 @@ public class EventServiceImpl implements EventService {
 
     @Transactional(readOnly = true)
     @Override
-    public Page<EventResponse> search(String title, String city, Short categoryId, BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable) {
-        return eventRepository.findFilteredEvents(title, city, categoryId, minPrice, maxPrice, pageable)
+    public Page<EventResponse> search(String title, String city, Short categoryId, BigDecimal minPrice, BigDecimal maxPrice, boolean upcomingOnly, Pageable pageable) {
+        return eventRepository.findFilteredEvents(title, city, categoryId, minPrice, maxPrice, upcomingOnly, pageable)
                 .map(this::mapToResponse);
     }
 

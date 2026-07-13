@@ -5,8 +5,6 @@ import com.fullstack.ticketflow.category.dto.CategoryResponse;
 import com.fullstack.ticketflow.shared.exception.BusinessRuleException;
 import com.fullstack.ticketflow.shared.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,12 +18,6 @@ public class CategoryServiceImpl implements CategoryService {
 
     private CategoryResponse toResponse(Category c) {
         return new CategoryResponse(c.getId(), c.getName(), c.getDescription(), c.getCreatedAt());
-    }
-
-    @Transactional(readOnly = true)
-    @Override
-    public Page<CategoryResponse> list(Pageable pageable) {
-        return repository.findAll(pageable).map(this::toResponse);
     }
 
     @Transactional(readOnly = true)

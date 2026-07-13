@@ -20,13 +20,15 @@ public interface EventRepository extends JpaRepository<Event, Integer> {
             "AND (:categoryId IS NULL OR e.category.id = :categoryId) " +
             "AND (:minPrice IS NULL OR t.price >= :minPrice) " +
             "AND (:maxPrice IS NULL OR t.price <= :maxPrice) " +
-            "AND e.status = 'ACTIVE'")
+            "AND e.status = 'ACTIVE' " +
+            "AND (:upcomingOnly = false OR e.dateTime > CURRENT_TIMESTAMP)")
     Page<Event> findFilteredEvents(
             @Param("title") String title,
             @Param("city") String city,
             @Param("categoryId") Short categoryId,
             @Param("minPrice") BigDecimal minPrice,
             @Param("maxPrice") BigDecimal maxPrice,
+            @Param("upcomingOnly") boolean upcomingOnly,
             Pageable pageable
     );
 }

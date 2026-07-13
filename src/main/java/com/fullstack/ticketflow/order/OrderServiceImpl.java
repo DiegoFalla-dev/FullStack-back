@@ -93,6 +93,8 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional
     public OrderResponse createOrder(String userEmail, OrderRequest request) {
+        log.info("SALE checkout-start user={} items={}", userEmail, request.items().size());
+
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado: " + userEmail));
 
@@ -109,10 +111,32 @@ public class OrderServiceImpl implements OrderService {
             TicketType ticketType = ticketTypeRepository.findByIdWithLock(itemReq.ticketTypeId())
                     .orElseThrow(() -> new ResourceNotFoundException("Categoría no encontrada: " + itemReq.ticketTypeId()));
 
+            var event = ticketType.getEvent();
+            if (!"ACTIVE".equals(event.getStatus()) || !event.getDateTime().isAfter(LocalDateTime.now())) {
+                log.warn(
+                        "SALE rejected user={} ticketTypeId={} eventId={} status={} dateTime={}",
+                        userEmail,
+                        ticketType.getId(),
+                        event.getId(),
+                        event.getStatus(),
+                        event.getDateTime()
+                );
+                throw new BusinessRuleException("No se puede comprar entradas de un evento finalizado o no activo.");
+            }
+
             int availableStock = ticketType.getTotalQty() - ticketType.getSoldQty();
             if (itemReq.quantity() > availableStock) {
                 throw new InsufficientStockException("Stock insuficiente para: " + ticketType.getName());
             }
+
+            log.info(
+                    "SALE item user={} eventId={} ticketTypeId={} qty={} availableBefore={}",
+                    userEmail,
+                    event.getId(),
+                    ticketType.getId(),
+                    itemReq.quantity(),
+                    availableStock
+            );
 
             ticketType.setSoldQty(ticketType.getSoldQty() + itemReq.quantity());
             ticketTypeRepository.save(ticketType);
@@ -144,6 +168,13 @@ public class OrderServiceImpl implements OrderService {
         order.setTotalAmount(orderTotal);
 
         Order savedOrder = orderRepository.save(order);
+        log.info(
+                "SALE checkout-success orderId={} user={} total={} tickets={}",
+                savedOrder.getId(),
+                userEmail,
+                savedOrder.getTotalAmount(),
+                savedOrder.getOrderItems().stream().mapToInt(OrderItem::getQuantity).sum()
+        );
 
         // --- TRANSMISIÓN POR WEBSOCKET (COMPRA EXITOSA) ---
         // Se difunde el nuevo stock de cada categoría y se avisa a los
@@ -194,6 +225,14 @@ public class OrderServiceImpl implements OrderService {
         int currentStock = savedTicketType.getTotalQty() - savedTicketType.getSoldQty();
         broadcastStock(savedTicketType.getId(), currentStock);
         broadcastMetricsChanged();
+        log.info(
+                "SALE ticket-cancelled user={} ticketId={} orderId={} ticketTypeId={} stock={}",
+                userEmail,
+                ticketId,
+                ticket.getOrderItem().getOrder().getId(),
+                savedTicketType.getId(),
+                currentStock
+        );
         // ----------------------------------------------------------------------------------
     }
 
@@ -283,6 +322,12 @@ public class OrderServiceImpl implements OrderService {
                         .status(t.getStatus().name())
                         .eventId(t.getOrderItem().getTicketType().getEvent().getId())
                         .eventTitle(t.getOrderItem().getTicketType().getEvent().getTitle())
+                        .eventCategoryId(t.getOrderItem().getTicketType().getEvent().getCategory() != null
+                                ? t.getOrderItem().getTicketType().getEvent().getCategory().getId()
+                                : null)
+                        .eventCategoryName(t.getOrderItem().getTicketType().getEvent().getCategory() != null
+                                ? t.getOrderItem().getTicketType().getEvent().getCategory().getName()
+                                : null)
                         .ticketTypeName(t.getOrderItem().getTicketType().getName())
                         .createdAt(t.getCreatedAt())
                         .build()).collect(Collectors.toList()))

@@ -7,7 +7,7 @@ import org.springframework.data.domain.Pageable;
 import java.math.BigDecimal;
 
 public interface EventService {
-    Page<EventResponse> search(String title, String city, BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable);
+    Page<EventResponse> search(String title, String city, Short categoryId, BigDecimal minPrice, BigDecimal maxPrice, boolean upcomingOnly, Pageable pageable);
     Page<EventResponse> listMine(String organizerEmail, Pageable pageable);
     EventResponse getById(Integer id);
     EventResponse create(String organizerEmail, EventRequest request);

@@ -13,5 +13,7 @@ public record EventResponse(
         String status,
         VenueResponse venue,
         String organizerName,
-        BigDecimal minPrice // Auxiliar para mostrar el precio "Desde S/ X" en las tarjetas del Frontend
+        BigDecimal minPrice, // Auxiliar para mostrar el precio "Desde S/ X" en las tarjetas del Frontend
+        Short categoryId,
+        String categoryName
 ) {}

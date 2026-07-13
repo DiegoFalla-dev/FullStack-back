@@ -12,6 +12,8 @@ public class TicketResponse {
     private String status;
     private Integer eventId;
     private String eventTitle;
+    private Short eventCategoryId;
+    private String eventCategoryName;
     private String ticketTypeName;
     private LocalDateTime createdAt;
 }

@@ -2,22 +2,38 @@ package com.fullstack.ticketflow.venue;
 
 import com.fullstack.ticketflow.venue.dto.VenueRequest;
 import com.fullstack.ticketflow.venue.dto.VenueResponse;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import org.springframework.stereotype.Component;
 
-@Mapper(componentModel = "spring")
-public interface VenueMapper {
+// Mapper manual (sin MapStruct) para no depender del procesamiento de
+// anotaciones en el IDE.
+@Component
+public class VenueMapper {
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
-    Venue toEntity(VenueRequest request);
+    public Venue toEntity(VenueRequest request) {
+        return Venue.builder()
+                .name(request.name())
+                .address(request.address())
+                .city(request.city())
+                .capacity(request.capacity())
+                .build();
+    }
 
-    VenueResponse toResponse(Venue venue);
+    public VenueResponse toResponse(Venue venue) {
+        return new VenueResponse(
+                venue.getId(),
+                venue.getName(),
+                venue.getAddress(),
+                venue.getCity(),
+                venue.getCapacity(),
+                venue.getCreatedAt(),
+                venue.getUpdatedAt()
+        );
+    }
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
-    void updateFromDto(VenueRequest request, @MappingTarget Venue entity);
+    public void updateFromDto(VenueRequest request, Venue entity) {
+        entity.setName(request.name());
+        entity.setAddress(request.address());
+        entity.setCity(request.city());
+        entity.setCapacity(request.capacity());
+    }
 }

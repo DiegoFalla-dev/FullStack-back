@@ -1,35 +1,37 @@
 package com.fullstack.ticketflow.user;
 
-import com.fullstack.ticketflow.role.Role;
-import com.fullstack.ticketflow.user.dto.PasswordChangeRequest;
 import com.fullstack.ticketflow.user.dto.UserRequest;
 import com.fullstack.ticketflow.user.dto.UserResponse;
 import com.fullstack.ticketflow.user.dto.UserUpdateRequest;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import org.springframework.stereotype.Component;
 
-@Mapper(componentModel = "spring")
-public interface UserMapper {
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "role", ignore = true)
-    @Mapping(target = "pwdHash", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "active", ignore = true)
-    User toEntity(UserRequest request);
+// Mapper manual (sin MapStruct) para no depender del procesamiento de
+// anotaciones en el IDE. El role, pwdHash y active los gestiona el
+// servicio (no se mapean aquí).
+@Component
+public class UserMapper {
 
-    @Mapping(target = "roleId", source = "role.id")
-    @Mapping(target = "roleName", source = "role.name")
-    @Mapping(target = "isActive", source = "active")
-    UserResponse toResponse(User user);
+    public User toEntity(UserRequest request) {
+        return User.builder()
+                .email(request.email())
+                .fullName(request.fullName())
+                .build();
+    }
 
-    @Mapping(target = "id", ignore = true)
-    @Mapping(target = "role", ignore = true)
-    @Mapping(target = "email", ignore = true)
-    @Mapping(target = "pwdHash", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
-    @Mapping(target = "active", ignore = true)
-    void updateFromDto(UserUpdateRequest request, @MappingTarget User entity);
+    public UserResponse toResponse(User user) {
+        return new UserResponse(
+                user.getId(),
+                user.getEmail(),
+                user.getFullName(),
+                user.getRole() != null ? user.getRole().getId() : null,
+                user.getRole() != null ? user.getRole().getName() : null,
+                user.isActive(),
+                user.getCreatedAt(),
+                user.getUpdatedAt()
+        );
+    }
+
+    public void updateFromDto(UserUpdateRequest request, User entity) {
+        entity.setFullName(request.fullName());
+    }
 }

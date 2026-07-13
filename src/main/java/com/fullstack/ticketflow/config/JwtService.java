@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -14,13 +15,18 @@ import java.util.Date;
 import java.util.Map;
 import java.util.function.Function;
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class JwtService {
     private final JwtConfig jwtConfig;
 
     public String generateToken(UserDetails userDetails) {
-        return buildToken(Map.of("role", userDetails.getAuthorities().stream().findFirst().map(Object::toString).orElse("ROLE_USER")), userDetails.getUsername());
+        String role = userDetails.getAuthorities().stream().findFirst().map(Object::toString).orElse("ROLE_USER");
+        String token = buildToken(Map.of("role", role), userDetails.getUsername());
+        log.info("JWT | token generado user={} role={} expiraEnMs={}",
+                userDetails.getUsername(), role, jwtConfig.getExpirationMs());
+        return token;
     }
 
     public String extractUsername(String token) {
@@ -32,7 +38,9 @@ public class JwtService {
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        return extractUsername(token).equals(userDetails.getUsername()) && !isTokenExpired(token);
+        boolean valido = extractUsername(token).equals(userDetails.getUsername()) && !isTokenExpired(token);
+        log.debug("JWT | validación user={} resultado={}", userDetails.getUsername(), valido);
+        return valido;
     }
 
     private boolean isTokenExpired(String token) {

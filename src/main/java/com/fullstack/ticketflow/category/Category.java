@@ -1,4 +1,4 @@
-package com.fullstack.ticketflow.role;
+package com.fullstack.ticketflow.category;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,21 +21,21 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 @Entity
-@Table(name = "roles")
-public class Role {
+@Table(name = "categories")
+public class Category {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(columnDefinition = "TINYINT UNSIGNED")
+    @Column(columnDefinition = "SMALLINT UNSIGNED")
     private Short id;
 
-    @Column(nullable = false, unique = true, length = 50)
+    @Column(nullable = false, unique = true, length = 60)
     private String name;
 
-    // nullable (sin nullable=false) para que Hibernate pueda AÑADIR la columna
-    // a una tabla 'roles' preexistente con filas, sin chocar con el modo
-    // estricto de MySQL. @CreationTimestamp la rellena en cada inserción nueva.
+    @Column(length = 255)
+    private String description;
+
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 }

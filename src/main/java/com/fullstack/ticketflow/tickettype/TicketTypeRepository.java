@@ -17,4 +17,12 @@ public interface TicketTypeRepository extends JpaRepository<TicketType, Integer>
     // NUEVO: necesario para que el front liste las categorías de precio
     // de un evento (selector de compra, panel del organizador).
     List<TicketType> findAllByEventId(Integer eventId);
+
+    @Query("SELECT COALESCE(SUM(t.totalQty), 0) FROM TicketType t " +
+            "WHERE t.event.id = :eventId " +
+            "AND (:excludeId IS NULL OR t.id <> :excludeId)")
+    Long sumTotalQtyByEventIdExcludingId(
+            @Param("eventId") Integer eventId,
+            @Param("excludeId") Integer excludeId
+    );
 }

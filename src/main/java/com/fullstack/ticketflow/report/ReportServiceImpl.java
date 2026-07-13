@@ -90,6 +90,35 @@ public class ReportServiceImpl implements ReportService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<TicketsByCategoryMonthResponse> getTicketsByEventCategoryByMonth() {
+        Map<CategoryMonthKey, Long> totals = new LinkedHashMap<>();
+
+        orderRepository.findAll().stream()
+                .filter(order -> order.getPaymentStatus() == PaymentStatus.PAID)
+                .sorted(Comparator.comparing(this::getOrderMonth))
+                .forEach(order -> {
+                    YearMonth month = getOrderMonth(order);
+                    for (OrderItem item : order.getOrderItems()) {
+                        var event = item.getTicketType().getEvent();
+                        String categoria = (event.getCategory() != null)
+                                ? event.getCategory().getName()
+                                : "Sin categoría";
+                        CategoryMonthKey key = new CategoryMonthKey(month, categoria);
+                        totals.merge(key, item.getQuantity().longValue(), Long::sum);
+                    }
+                });
+
+        return totals.entrySet().stream()
+                .map(entry -> new TicketsByCategoryMonthResponse(
+                        entry.getKey().month().toString(),
+                        entry.getKey().category(),
+                        entry.getValue()
+                ))
+                .collect(Collectors.toList());
+    }
+
     private YearMonth getOrderMonth(Order order) {
         return YearMonth.from(order.getPaidAt() != null ? order.getPaidAt() : order.getCreatedAt());
     }
